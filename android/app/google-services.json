@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "170519962252",
+    "project_id": "inempolyeecredit",
+    "storage_bucket": "inempolyeecredit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170519962252:android:38e8a527781cb60c1851a9",
+        "android_client_info": {
+          "package_name": "com.example.androiduber"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgihHDKWtN1lCVaPF00_SbI-M4z-Nr2UE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
