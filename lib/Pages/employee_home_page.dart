@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'log_commute_page.dart';
+<<<<<<< HEAD
+=======
+import 'RedeemCreditsPage.dart';
+>>>>>>> master
 import 'package:android_uber/auth/sigin_page.dart';
 
 class EmployeeHomePage extends StatefulWidget {
@@ -39,6 +43,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     });
   }
 
+<<<<<<< HEAD
   Future<void> redeemCredits(int amountToRedeem) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -96,6 +101,8 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     );
   }
 
+=======
+>>>>>>> master
   Widget _dashboardTab() {
     return Center(
       child: Column(
@@ -129,7 +136,16 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
               backgroundColor: Colors.green,
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
             ),
+<<<<<<< HEAD
             onPressed: showRedeemDialog,
+=======
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RedeemCreditsPage()),
+              );
+            },
+>>>>>>> master
           ),
         ],
       ),

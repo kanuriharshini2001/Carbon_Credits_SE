@@ -57,7 +57,11 @@ class _SignupPageState extends State<SignupPage> {
           "role": selectedRole,
           "homeAddress": homeAddressController.text.trim(),
           "officeLocation": officeLocationController.text.trim(),
+<<<<<<< HEAD
           "approved": false,
+=======
+          "approved": true,
+>>>>>>> master
           "credits": 0,
         };
 
