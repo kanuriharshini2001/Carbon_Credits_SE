@@ -1,25 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:firebase_database/firebase_database.dart';
-
-class RedemptionRequestsPage extends StatelessWidget {
-  const RedemptionRequestsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final ref = FirebaseDatabase.instance.ref("pendingRedemptions");
-
-    return Scaffold(
-      appBar: AppBar(title: const Text("Redemption Approvals"), backgroundColor: Colors.purple),
-      body: StreamBuilder(
-        stream: ref.onValue,
-        builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-          if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
-            return const Center(child: Text("No pending requests."));
-          }
-
-          final Map data = snapshot.data!.snapshot.value as Map;
-=======
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -82,41 +61,23 @@ class _RedemptionRequestsPageState extends State<RedemptionRequestsPage> {
           }
 
           final Map data = Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
->>>>>>> master
           final entries = data.entries.toList();
 
           return ListView.builder(
             itemCount: entries.length,
             itemBuilder: (context, index) {
               final request = entries[index];
-<<<<<<< HEAD
-              final uid = request.key;
-              final reward = request.value["reward"];
-              final userEmail = request.value["email"];
-              final timestamp = request.value["timestamp"];
-=======
               final requestData = Map<String, dynamic>.from(request.value);
               final reward = requestData["reward"];
               final userEmail = requestData["email"];
               final userId = requestData["uid"];
               final timestamp = requestData["timestamp"];
->>>>>>> master
 
               return ListTile(
                 title: Text("$userEmail → $reward"),
                 subtitle: Text("Requested on ${DateTime.fromMillisecondsSinceEpoch(timestamp)}"),
                 trailing: ElevatedButton(
                   onPressed: () async {
-<<<<<<< HEAD
-                    final userRef = FirebaseDatabase.instance.ref("redemptions/$uid").push();
-                    await userRef.set({
-                      "reward": reward,
-                      "status": "Approved",
-                      "timestamp": DateTime.now().millisecondsSinceEpoch,
-                    });
-
-                    await ref.child(uid!).remove();
-=======
                     try {
                       final approvedRef = FirebaseDatabase.instance.ref("redemptions/$userId").push();
                       await approvedRef.set({
@@ -137,7 +98,6 @@ class _RedemptionRequestsPageState extends State<RedemptionRequestsPage> {
                         SnackBar(content: Text("Error: ${e.toString()}")),
                       );
                     }
->>>>>>> master
                   },
                   child: const Text("Approve"),
                 ),

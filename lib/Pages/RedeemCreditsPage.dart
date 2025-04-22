@@ -48,27 +48,6 @@ class _RedeemCreditsPageState extends State<RedeemCreditsPage> {
       return;
     }
 
-<<<<<<< HEAD
-    // Push to pendingRedemptions
-    final ref = FirebaseDatabase.instance.ref("pendingRedemptions/${user.uid}");
-    await ref.set({
-      "email": user.email,
-      "reward": reward,
-      "timestamp": DateTime.now().millisecondsSinceEpoch,
-    });
-
-    // Deduct credits
-    final userCreditsRef = FirebaseDatabase.instance.ref("users/${user.uid}/credits");
-    await userCreditsRef.set(userCredits - cost);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Redemption request submitted")),
-    );
-
-    setState(() {
-      userCredits -= cost;
-    });
-=======
     try {
       final ref = FirebaseDatabase.instance.ref("pendingRedemptions").push();
       await ref.set({
@@ -93,29 +72,11 @@ class _RedeemCreditsPageState extends State<RedeemCreditsPage> {
         SnackBar(content: Text("Error submitting redemption: $e")),
       );
     }
->>>>>>> master
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-      appBar: AppBar(title: const Text("Redeem Credits"), backgroundColor: Colors.purple),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: rewards.map((reward) {
-          return Card(
-            child: ListTile(
-              title: Text(reward["label"]),
-              subtitle: Text("${reward["cost"]} Credits"),
-              trailing: ElevatedButton(
-                onPressed: () => requestRedemption(reward["label"], reward["cost"]),
-                child: const Text("Redeem"),
-              ),
-            ),
-          );
-        }).toList(),
-=======
       appBar: AppBar(
         title: const Text("Redeem Credits"),
         backgroundColor: Colors.purple,
@@ -162,7 +123,6 @@ class _RedeemCreditsPageState extends State<RedeemCreditsPage> {
             ),
           ),
         ],
->>>>>>> master
       ),
     );
   }
