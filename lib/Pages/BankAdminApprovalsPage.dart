@@ -146,5 +146,5 @@ class _BankAdminApprovalsPageState extends State<BankAdminApprovalsPage> {
         },
       ),
     );
-  }
+  } 
 }
