@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'log_commute_page.dart';
-<<<<<<< HEAD
-=======
 import 'RedeemCreditsPage.dart';
->>>>>>> master
+import 'MonthlySummarypage.dart';
 import 'package:android_uber/auth/sigin_page.dart';
 
 class EmployeeHomePage extends StatefulWidget {
@@ -43,111 +41,97 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     });
   }
 
-<<<<<<< HEAD
-  Future<void> redeemCredits(int amountToRedeem) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final userRef = FirebaseDatabase.instance.ref("users/${user.uid}/credits");
-    final snapshot = await userRef.get();
-    final currentCredits = (snapshot.value as int?) ?? 0;
-
-    if (currentCredits >= amountToRedeem) {
-      await userRef.set(currentCredits - amountToRedeem);
-
-      await FirebaseDatabase.instance
-          .ref("redemptions/${user.uid}")
-          .push()
-          .set({
-        "amount": amountToRedeem,
-        "status": "Pending",
-        "timestamp": DateTime.now().millisecondsSinceEpoch,
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Redeemed $amountToRedeem credits successfully!")),
-      );
-
-      fetchTotalCredits();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Not enough credits to redeem.")),
-      );
-    }
-  }
-
-  void showRedeemDialog() {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text("Redeem Your Credits"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("You have $totalCredits credits."),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () {
-                  redeemCredits(50);
-                  Navigator.pop(context);
-                },
-                child: const Text("Redeem 50 Credits for ₹50 Gift Card"),
+  Widget _dashboardTab() {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Total Credits: $totalCredits",
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-            ],
-          ),
-        );
-      },
+            ),
+            const SizedBox(height: 20),
+            _buildResponsiveActionButton(
+              text: "Log Commute",
+              color: Colors.blue,
+              icon: Icons.add_location_alt,
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LogCommutePage()),
+                );
+                fetchTotalCredits();
+              },
+            ),
+            const SizedBox(height: 10),
+            _buildResponsiveActionButton(
+              text: "Redeem Credits",
+              color: Colors.green,
+              icon: Icons.card_giftcard,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RedeemCreditsPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            _buildResponsiveActionButton(
+              text: "Monthly Summary",
+              color: Colors.blueGrey,
+              icon: Icons.bar_chart,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MonthlySummaryPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-=======
->>>>>>> master
-  Widget _dashboardTab() {
+  Widget _buildResponsiveActionButton({
+    required String text,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive values
+    double iconSize = screenWidth < 600 ? 18 : 24;
+    double fontSize = screenWidth < 600 ? 13 : 16;
+    double buttonHeight = screenWidth < 600 ? 44 : 54;
+    double maxWidth = screenWidth < 600 ? 260 : 320;
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "Total Credits: $totalCredits",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.add),
-            label: const Text("Log Commute"),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: SizedBox(
+          height: buttonHeight,
+          child: ElevatedButton.icon(
+            icon: Icon(icon, size: iconSize),
+            label: Text(text, style: TextStyle(fontSize: fontSize)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              backgroundColor: color,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              elevation: 3,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LogCommutePage()),
-              );
-              fetchTotalCredits();
-            },
+            onPressed: onPressed,
           ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.redeem),
-            label: const Text("Redeem Credits"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-            ),
-<<<<<<< HEAD
-            onPressed: showRedeemDialog,
-=======
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RedeemCreditsPage()),
-              );
-            },
->>>>>>> master
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -167,6 +151,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
         final entries = data.entries.toList();
 
         return ListView.builder(
+          padding: const EdgeInsets.all(12),
           itemCount: entries.length,
           itemBuilder: (context, index) {
             final commute = entries[index].value;
@@ -178,14 +163,22 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             final rawTimestamp = commute["timestamp"];
             if (rawTimestamp is int) {
               final dt = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
-              formattedDate = "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
+              formattedDate =
+              "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
             }
 
-            return ListTile(
-              leading: const Icon(Icons.directions_bus),
-              title: Text("${mode ?? "Unknown"} - ${credits ?? 0} credits"),
-              subtitle: Text("Miles: ${miles != null ? miles.toStringAsFixed(2) : "N/A"}"),
-              trailing: Text(formattedDate),
+            return Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              elevation: 2,
+              child: ListTile(
+                leading: const Icon(Icons.directions_bus, color: Colors.purple),
+                title: Text("$mode - $credits credits"),
+                subtitle: Text("Miles: ${miles?.toStringAsFixed(2) ?? "N/A"}"),
+                trailing: Text(formattedDate),
+              ),
             );
           },
         );
@@ -196,28 +189,38 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   Widget _profileTab() {
     final user = FirebaseAuth.instance.currentUser;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.person, size: 60, color: Colors.purple),
-          const SizedBox(height: 10),
-          const Text("Logged in as", style: TextStyle(fontSize: 16)),
-          Text(user?.email ?? "No email", style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const SignInPage()),
-                    (route) => false,
-              );
-            },
-            icon: const Icon(Icons.logout),
-            label: const Text("Logout"),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-          )
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.deepPurple,
+              child: Icon(Icons.person, size: 50, color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            const Text("Logged in as", style: TextStyle(fontSize: 16)),
+            Text(
+              user?.email ?? "No email",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 30),
+            _buildResponsiveActionButton(
+              text: "Logout",
+              color: Colors.deepPurple,
+              icon: Icons.logout,
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SignInPage()),
+                      (route) => false,
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -227,15 +230,20 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     final tabs = [_dashboardTab(), _creditsLogTab(), _profileTab()];
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9F6FE),
       appBar: AppBar(
         title: const Text("Employee Portal"),
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.deepPurple,
+        centerTitle: true,
+        elevation: 2,
       ),
       body: tabs[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onTabTapped,
-        selectedItemColor: Colors.purple,
+        selectedItemColor: Colors.deepPurple,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),

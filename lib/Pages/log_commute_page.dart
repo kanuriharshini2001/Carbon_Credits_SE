@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'map_picker_page.dart';
 
@@ -17,10 +17,38 @@ class _LogCommutePageState extends State<LogCommutePage> {
   String? fromCoordinates;
   String? toCoordinates;
 
+  String? homeAddress;
+  String? officeLocation;
+  String? homeCoords;
+  String? officeCoords;
+
   double calculatedDistance = 0.0;
   String selectedMode = "carpool";
   final List<String> modes = ["carpool", "public", "wfh", "private"];
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserAddresses();
+  }
+
+  Future<void> fetchUserAddresses() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final ref = FirebaseDatabase.instance.ref("users/${user.uid}");
+    final snapshot = await ref.get();
+    if (snapshot.exists) {
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      setState(() {
+        homeAddress = data["homeAddress"];
+        homeCoords = data["homeCoords"];
+        officeLocation = data["officeLocation"];
+        officeCoords = data["officeCoords"];
+      });
+    }
+  }
 
   int getPointsForMode(String mode) {
     switch (mode) {
@@ -48,7 +76,7 @@ class _LogCommutePageState extends State<LogCommutePage> {
 
     double distance = Geolocator.distanceBetween(
       startLatLng[0], startLatLng[1], endLatLng[0], endLatLng[1],
-    ) / 1609.34; // meters to miles
+    ) / 1609.34;
 
     setState(() {
       calculatedDistance = distance;
@@ -59,7 +87,6 @@ class _LogCommutePageState extends State<LogCommutePage> {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // Save to Realtime Database
     final commuteRef = FirebaseDatabase.instance.ref("commutes/${user.uid}").push();
     await commuteRef.set({
       "fromAddress": fromAddress,
@@ -72,7 +99,6 @@ class _LogCommutePageState extends State<LogCommutePage> {
       "timestamp": DateTime.now().millisecondsSinceEpoch,
     });
 
-    // Update total user credits
     final userRef = FirebaseDatabase.instance.ref("users/${user.uid}/credits");
     final snapshot = await userRef.get();
     final existingCredits = (snapshot.value as int?) ?? 0;
@@ -92,7 +118,12 @@ class _LogCommutePageState extends State<LogCommutePage> {
   Future<void> pickLocation(bool isFrom) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const MapPickerPage()),
+      MaterialPageRoute(
+        builder: (_) => MapPickerPage(
+          isHome: false,
+          isOffice: false,
+        ),
+      ),
     );
 
     if (result != null) {
@@ -112,48 +143,109 @@ class _LogCommutePageState extends State<LogCommutePage> {
     }
   }
 
+  void setFromShortcut(bool isFrom, String label, String coords) {
+    setState(() {
+      if (isFrom) {
+        fromAddress = label;
+        fromCoordinates = coords;
+      } else {
+        toAddress = label;
+        toCoordinates = coords;
+      }
+    });
+  }
+
+  Widget buildShortcutCard({
+    required IconData icon,
+    required String label,
+    required String? address,
+    required String? coords,
+    required bool isFrom,
+  }) {
+    if (address == null || coords == null) return const SizedBox.shrink();
+
+    return GestureDetector(
+      onTap: () => setFromShortcut(isFrom, address, coords),
+      child: Card(
+        child: ListTile(
+          leading: Icon(icon, color: Colors.purple),
+          title: Text(label),
+          subtitle: Text(address),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Log Your Commute"), backgroundColor: Colors.purple),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(children: [
-          ListTile(
-            leading: const Icon(Icons.location_pin),
-            title: Text(fromAddress ?? "Select From Location"),
-            trailing: ElevatedButton(
-              onPressed: () => pickLocation(true),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text("Pick"),
+      appBar: AppBar(
+        title: const Text("Log Your Commute"),
+        backgroundColor: Colors.purple,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildShortcutCard(
+              icon: Icons.home,
+              label: "Home Address",
+              address: homeAddress,
+              coords: homeCoords,
+              isFrom: true,
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.location_pin),
-            title: Text(toAddress ?? "Select To Location"),
-            trailing: ElevatedButton(
-              onPressed: () => pickLocation(false),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              child: const Text("Pick"),
+            buildShortcutCard(
+              icon: Icons.work,
+              label: "Office Location",
+              address: officeLocation,
+              coords: officeCoords,
+              isFrom: false,
             ),
-          ),
-          const SizedBox(height: 10),
-          Text("Distance: ${calculatedDistance.toStringAsFixed(2)} miles",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            value: selectedMode,
-            items: modes.map((mode) => DropdownMenuItem(value: mode, child: Text(mode.toUpperCase()))).toList(),
-            onChanged: (value) => setState(() => selectedMode = value!),
-            decoration: const InputDecoration(labelText: "Mode of Transport"),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: submitCommute,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-            child: const Text("Submit Commute", style: TextStyle(color: Colors.white)),
-          ),
-        ]),
+            const SizedBox(height: 10),
+            ListTile(
+              leading: const Icon(Icons.location_on),
+              title: Text(fromAddress ?? "Select From Location"),
+              trailing: ElevatedButton(
+                onPressed: () => pickLocation(true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                child: const Text("Pick"),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.location_on),
+              title: Text(toAddress ?? "Select To Location"),
+              trailing: ElevatedButton(
+                onPressed: () => pickLocation(false),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                child: const Text("Pick"),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Distance: ${calculatedDistance.toStringAsFixed(2)} miles",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: selectedMode,
+              items: modes
+                  .map((mode) =>
+                  DropdownMenuItem(value: mode, child: Text(mode.toUpperCase())))
+                  .toList(),
+              onChanged: (value) => setState(() => selectedMode = value!),
+              decoration: const InputDecoration(labelText: "Mode of Transport"),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: submitCommute,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                child: const Text("Submit Commute", style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

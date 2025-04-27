@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:android_uber/auth/sigin_page.dart';
 
 class AdminApprovalPage extends StatefulWidget {
   const AdminApprovalPage({super.key});
@@ -11,12 +13,27 @@ class AdminApprovalPage extends StatefulWidget {
 class _AdminApprovalPageState extends State<AdminApprovalPage> {
   final DatabaseReference usersRef = FirebaseDatabase.instance.ref("users");
 
+  void _logoutAdmin() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const SignInPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Pending User Approvals"),
         backgroundColor: Colors.purple,
+        actions: [
+          IconButton(
+            onPressed: _logoutAdmin,
+            icon: const Icon(Icons.logout),
+            tooltip: "Logout",
+          )
+        ],
       ),
       body: StreamBuilder<DatabaseEvent>(
         stream: usersRef.onValue,

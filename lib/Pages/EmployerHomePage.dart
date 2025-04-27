@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:android_uber/auth/sigin_page.dart';
+
 import 'EmployerDashboardPage.dart';
-import 'RedemptionRequestsPage.dart'; // Add this import
+import 'RedemptionRequestsPage.dart';
+import 'EmployerMarketplace.dart';
 
 class EmployerHomePage extends StatefulWidget {
   const EmployerHomePage({super.key});
@@ -13,9 +17,9 @@ class _EmployerHomePageState extends State<EmployerHomePage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    EmployerDashboardPage(),         // Tab 0: Employees & their credits
-    RedemptionRequestsPage(),        // Tab 1: Admin handles pending redemptions
-    Center(child: Text("Profile Page (Coming Soon)", style: TextStyle(fontSize: 18))),
+    EmployerDashboardPage(),
+    RedemptionRequestsPage(),
+    EmployerMarketplacePage(),
   ];
 
   void _onTabTapped(int index) {
@@ -24,12 +28,27 @@ class _EmployerHomePageState extends State<EmployerHomePage> {
     });
   }
 
+  void _logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const SignInPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Employer Portal"),
         backgroundColor: Colors.purple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () => _logout(context),
+          ),
+        ],
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -46,8 +65,8 @@ class _EmployerHomePageState extends State<EmployerHomePage> {
             label: 'Requests',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: Icon(Icons.shopping_cart),
+            label: 'Marketplace',
           ),
         ],
       ),
