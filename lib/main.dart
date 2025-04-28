@@ -10,7 +10,7 @@ void main() async {
   if (Platform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: "AIzaSyDGDfnVRcZr0fCEyzjXV3-2vJWvsI5OnZI",
+        apiKey: "removed it as we made git public",
         authDomain: "inempolyeecredit.firebaseapp.com",
         projectId: "inempolyeecredit",
         storageBucket: "inempolyeecredit.firebasestorage.app",
