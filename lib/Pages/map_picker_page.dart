@@ -30,7 +30,7 @@ class _MapPickerPageState extends State<MapPickerPage> {
   @override
   void initState() {
     super.initState();
-    _googlePlace = GooglePlace("AIzaSyB0Tl3UAD7NRxFlBLgFpsNaYgtZMFOSvwQ");
+    _googlePlace = GooglePlace("API KEY:removed it as we made git public now");
     _setInitialPosition();
   }
 
